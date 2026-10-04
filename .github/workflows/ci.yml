@@ -22,16 +22,37 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run lint
       - run: bun run typecheck
-      - run: bun test
+      - run: bun run test
       - name: Install Playwright browser
-        run: bunx playwright install --with-deps chromium
+        run: bun run --filter @job-tracker/e2e install:browsers
       - run: bun run test:e2e
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report
-          path: playwright-report/
+          path: |
+            playwright-report/
+            test-results/
           retention-days: 7
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t job-tracker:ci .
+      - name: Smoke test the image
+        run: |
+          docker run -d --name app -p 3000:3000 \
+            -e BETTER_AUTH_SECRET="$(openssl rand -hex 32)" \
+            -e BETTER_AUTH_URL=http://localhost:3000 \
+            -e WEB_ORIGIN=http://localhost:3000 \
+            job-tracker:ci
+          for i in $(seq 1 30); do curl -fsS http://localhost:3000/health && break; sleep 1; done
+          curl -fsS http://localhost:3000/health
+          curl -fsS http://localhost:3000/ | grep -q "Job Tracker"
+          test "$(docker exec app awk '/^Uid/{print $2}' /proc/1/status)" = "1000"
+          docker logs app
 
   security:
     runs-on: ubuntu-latest

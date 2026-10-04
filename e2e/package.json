@@ -1,0 +1,17 @@
+{
+  "name": "@job-tracker/e2e",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit",
+    "install:browsers": "playwright install --with-deps chromium",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.4",
+    "typescript": "^7.0.2"
+  }
+}

@@ -2,13 +2,17 @@
   "name": "job-tracker",
   "private": true,
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "e2e"
   ],
   "scripts": {
     "lint": "bun run --filter '*' lint",
     "typecheck": "bun run --filter '*' typecheck",
-    "test": "bun run --filter '*' test",
-    "test:e2e": "bun -e \"process.exit(0)\"",
-    "dev": "bun run --parallel --filter '*' dev"
+    "test": "bun run --filter './apps/*' test",
+    "test:e2e": "bun run --filter @job-tracker/e2e test:e2e",
+    "dev": "bun run --parallel --filter './apps/*' dev"
+  },
+  "overrides": {
+    "esbuild": "^0.28.2"
   }
 }

@@ -1,0 +1,45 @@
+# Fly.io app config. Deploys run from .github/workflows/deploy.yml after CI passes on main.
+#
+# One-time setup (needs flyctl and a Fly account):
+#   1. fly apps create <your-app-name>            (names are global; change `app` below to match)
+#   2. fly volumes create job_tracker_data --region <primary_region> --size 1 --app <your-app-name>
+#   3. fly secrets set BETTER_AUTH_SECRET="$(openssl rand -hex 32)" --app <your-app-name>
+#   4. fly tokens create deploy --app <your-app-name>   -> add as the GitHub secret FLY_API_TOKEN
+#
+# Keep this app at ONE machine: the SQLite file lives on that machine's volume.
+
+app = "sea-job-track"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+# Non-secret settings only. BETTER_AUTH_URL and WEB_ORIGIN must match the public URL
+# (https://<app>.fly.dev, or your custom domain). The secret is set with `fly secrets`.
+[env]
+  BETTER_AUTH_URL = "https://sea-job-track.fly.dev"
+  WEB_ORIGIN = "https://sea-job-track.fly.dev"
+  # Fly's edge sets this to the real client address; the API trusts nothing else.
+  TRUSTED_PROXY_HEADER = "fly-client-ip"
+
+[[mounts]]
+  source = "job_tracker_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

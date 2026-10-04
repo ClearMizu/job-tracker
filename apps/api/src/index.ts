@@ -1,9 +1,9 @@
-import { Elysia } from "elysia";
+import { createApp } from "./app";
+import { parseEnv } from "./env";
 
-export const app = new Elysia().get("/health", () => ({ status: "ok" }));
-
-export type App = typeof app;
+export type { App } from "./app";
 
 if (import.meta.main) {
-  app.listen(3000);
+  const env = parseEnv(process.env);
+  createApp(env).listen(Number(new URL(env.BETTER_AUTH_URL).port) || 3000);
 }

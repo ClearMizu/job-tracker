@@ -1,0 +1,17 @@
+**/node_modules
+**/dist
+.git
+.github
+.env
+.env.*
+!.env.example
+**/*.db
+**/*.db-*
+**/data
+docs
+playwright-report
+test-results
+**/*.test.ts
+**/*.test.tsx
+e2e/*
+!e2e/package.json

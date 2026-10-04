@@ -1,5 +1,4 @@
-# Deploys only after CI passes on main.
-# Placeholder: fill in once you pick a host (Fly.io, Railway, etc). See docs/FIRST-SESSION.md, step 10.
+# Deploys to Fly.io only after CI has passed on main. See fly.toml for the one-time setup.
 name: Deploy
 
 on:
@@ -8,12 +7,29 @@ on:
     branches: [main]
     types: [completed]
 
+permissions:
+  contents: read
+
+# Never run two deploys at once, and never cancel one halfway through.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # `event == push` keeps pull requests (including forks that name a branch "main") from deploying.
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment: production
     steps:
+      # Deploy exactly the commit CI tested, not whatever main is by now.
       - uses: actions/checkout@v4
-      - name: Deploy
-        run: echo "Replace this step with your host's deploy command (e.g. flyctl deploy --remote-only)"
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      # --ha=false: SQLite on a volume means exactly one machine.
+      - run: flyctl deploy --remote-only --ha=false
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
