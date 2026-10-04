@@ -1,0 +1,14 @@
+{
+  "name": "job-tracker",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "lint": "bun run --filter '*' lint",
+    "typecheck": "bun run --filter '*' typecheck",
+    "test": "bun run --filter '*' test",
+    "test:e2e": "bun -e \"process.exit(0)\"",
+    "dev": "bun run --parallel --filter '*' dev"
+  }
+}

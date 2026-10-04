@@ -9,7 +9,7 @@
 **B. "Field notebook"**: warm paper, ink stamps for statuses, hand-drawn SVG underlines that draw themselves in.
 **C. "Mission control"**: dark, dense, monospace; the pipeline is a living SVG path with pulses along it.
 
-Chosen concept: **A. Dispatch board**   <- change me
+Chosen concept: **B. "Field notebook"**
 
 ## 2. Palette (hex values; these become CSS variables)
 
